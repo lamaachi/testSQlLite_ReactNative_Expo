@@ -4,8 +4,10 @@ import { getAllRecords, addRecord, deleteRecord } from '../database/db';
 import ImagePickerButton from '../components/ImagePickerButton';
 import RecordItem from '../components/RecordItem';
 import styles from '../styles/style';
+import { useSQLiteContext } from 'expo-sqlite';
 
 const HomeScreen = () => {
+  const db = useSQLiteContext();
   const [data, setData] = useState([]);
   const [article, setArticle] = useState('');
   const [price, setPrice] = useState('');
@@ -13,7 +15,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const records = await getAllRecords();
+      const records = await getAllRecords(db);
       setData(records);
     };
     fetchData();
@@ -21,25 +23,25 @@ const HomeScreen = () => {
 
   const handleAddRecord = async () => {
     try {
-      await addRecord(article, price, image);
+      await addRecord(article, price, image,db);
       setArticle('');
       setPrice('');
       setImage(null);
-      const records = await getAllRecords();
+      const records = await getAllRecords(db);
       setData(records);
     } catch (error) {
       console.log('Error adding record:', error);
     }
   };
 
-  const handleDeleteRecord = async (id) => {
+  const handleDeleteRecord = async (id,db) => {
     Alert.alert(
       'Delete Record',
       'Are you sure you want to delete this record?',
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', onPress: async () => {
-            await deleteRecord(id);
+            await deleteRecord(id,db);
             const records = await getAllRecords();
             setData(records);
           }
